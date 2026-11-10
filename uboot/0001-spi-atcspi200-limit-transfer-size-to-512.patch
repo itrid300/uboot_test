@@ -1,0 +1,36 @@
+diff --git a/drivers/spi/atcspi200_spi.c b/drivers/spi/atcspi200_spi.c
+index 72b612c6560..c305e68988a 100644
+--- a/drivers/spi/atcspi200_spi.c
++++ b/drivers/spi/atcspi200_spi.c
+@@ -376,6 +376,25 @@ static int atcspi200_spi_probe(struct udevice *bus)
+ 	return 0;
+ }
+ 
++/*
++ * WrTranCnt/RdTranCnt are 9-bit fields, so one controller transaction moves at
++ * most MAX_TRANSFER_LEN units, command/address bytes included.  Advertise
++ * that to spi-mem so the SPI-NOR core splits reads and writes itself, with
++ * correctly computed addresses, instead of relying on the chunking in
++ * __atcspi200_spi_xfer(), which re-sends the command with an address patched
++ * byte-wise without carry (wrong once a chunk crosses a 64 KiB boundary) and
++ * which only understands 3-byte addresses.
++ */
++static int atcspi200_spi_child_pre_probe(struct udevice *dev)
++{
++	struct spi_slave *slave = dev_get_parent_priv(dev);
++
++	slave->max_read_size = MAX_TRANSFER_LEN;
++	slave->max_write_size = MAX_TRANSFER_LEN;
++
++	return 0;
++}
++
+ static int atcspi200_ofdata_to_platadata(struct udevice *bus)
+ {
+ 	struct nds_spi_slave *ns = dev_get_priv(bus);
+@@ -415,4 +434,5 @@ U_BOOT_DRIVER(atcspi200_spi) = {
+ 	.of_to_plat = atcspi200_ofdata_to_platadata,
+ 	.priv_auto	= sizeof(struct nds_spi_slave),
+ 	.probe = atcspi200_spi_probe,
++	.child_pre_probe = atcspi200_spi_child_pre_probe,
+ };

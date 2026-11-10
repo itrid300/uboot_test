@@ -1,0 +1,291 @@
+
+===== ae350.sh start 4450 =====
+AE350 QEMU 已啟動
+  pid      : 2625087
+  console  : telnet localhost 4450
+  U-Boot   : /home/spoto/claude_workspace/build-spi/out/u-boot
+  DTB      : /home/spoto/claude_workspace/ae350-qemu/ae350_64.dtb
+  SD       : none
+  SPI      : /home/spoto/claude_workspace/ae350-qemu/run/spi-test-4450.img
+  (wait 模式：telnet 接上才開始開機，不會漏掉開頭 log)
+
+
+
+U-Boot 2026.10 (Nov 10 2026 - 14:33:56 +0800)
+
+CPU:   riscv
+Model: andestech,ax25
+DRAM:  1 GiB
+Core:  26 devices, 17 uclasses, devicetree: board
+Flash: ## Unknown flash on Bank 1 - Size = 0x00000000 = 0 MB
+0 Bytes
+MMC:   mmc@f0e00000: 0
+Loading Environment from SPIFlash...SF: Detected mx25l1606e with page size 256 Bytes, erase size 4 KiB, total 2 MiB
+*** Warning - bad CRC, using default environment
+
+In:    serial@f0300000
+Out:   serial@f0300000
+Err:   serial@f0300000
+Net:   no alias for ethernet0
+
+Warning: mac@e0100000 (eth0) using random MAC address - c2:72:a5:af:df:ec
+eth0: mac@e0100000
+[2KHit any key to stop autoboot: 3[2KHit any key to stop autoboot: 0
+RISC-V # 
+### PASS boot1: U-Boot prompt reached
+
+### FAIL boot1: env loaded via SPI flash (MX25L1606E detected)
+sf probe
+SF: Detected mx25l1606e with page size 256 Bytes, erase size 4 KiB, total 2 MiB
+RISC-V # 
+### PASS sf probe
+sf read 0x1000000 0 0x200000
+device 0 whole chip
+SF: 2097152 bytes @ 0x0 Read: OK
+RISC-V # crc32 0x1000000 0x200000
+crc32 for 01000000 ... 011fffff ==> 5c02d5db
+RISC-V # 
+### FAIL sf read whole chip 2 MiB @0x0  (crc 5c02d5db expect 44d4d4f8)
+sf read 0x1400000 0x12345 0x1001
+device 0 offset 0x12345, size 0x1001
+SF: 4097 bytes @ 0x12345 Read: OK
+RISC-V # crc32 0x1400000 0x1001
+crc32 for 01400000 ... 01401000 ==> 49782395
+RISC-V # 
+### PASS sf read unaligned 0x1001 B @0x12345  (crc 49782395 expect 49782395)
+sf read 0x1400000 0x1fffff 0x1
+device 0 offset 0x1fffff, size 0x1
+SF: 1 bytes @ 0x1fffff Read: OK
+RISC-V # crc32 0x1400000 0x1
+crc32 for 01400000 ... 01400000 ==> d202ef8d
+RISC-V # 
+### PASS sf read 1 B @0x1fffff (last byte)  (crc d202ef8d expect d202ef8d)
+sf read 0x1400000 0xfe80 0x400
+device 0 offset 0xfe80, size 0x400
+SF: 1024 bytes @ 0xfe80 Read: OK
+RISC-V # crc32 0x1400000 0x400
+crc32 for 01400000 ... 014003ff ==> 8cedb693
+RISC-V # 
+### FAIL sf read 0x400 B @0xfe80 (2nd chunk crosses 64K)  (crc 8cedb693 expect 77cecc6f)
+sf read 0x1400000 0x7ffff 0x3
+device 0 offset 0x7ffff, size 0x3
+SF: 3 bytes @ 0x7ffff Read: OK
+RISC-V # crc32 0x1400000 0x3
+crc32 for 01400000 ... 01400002 ==> d1d589ce
+RISC-V # 
+### PASS sf read 0x3 B @0x7ffff (crosses 512K)  (crc d1d589ce expect d1d589ce)
+sf erase 0x10000 0x10000
+SF: 65536 bytes @ 0x10000 Erased: OK
+RISC-V # 
+### PASS sf erase 0x10000 +0x10000
+sf read 0x1400000 0x10000 0x10000
+device 0 offset 0x10000, size 0x10000
+SF: 65536 bytes @ 0x10000 Read: OK
+RISC-V # crc32 0x1400000 0x10000
+crc32 for 01400000 ... 0140ffff ==> deab7e4e
+RISC-V # 
+### PASS erased block reads back as 0xFF  (crc deab7e4e expect deab7e4e)
+sf erase 0x20001 0x1000
+SF: 4096 bytes @ 0x20001 Erased: ERROR -22
+RISC-V # 
+### PASS sf erase unaligned offset rejected  (SF: 4096 bytes @ 0x20001 Erased: ERROR -22)
+sf write 0x1080000 0x10003 0x1234
+device 0 offset 0x10003, size 0x1234
+SF: 4660 bytes @ 0x10003 Written: OK
+RISC-V # 
+### PASS sf write 0x1234 B @0x10003
+sf read 0x1400000 0x10003 0x1234
+device 0 offset 0x10003, size 0x1234
+SF: 4660 bytes @ 0x10003 Read: OK
+RISC-V # cmp.b 0x1080000 0x1400000 0x1234
+Total of 4660 byte(s) were the same
+RISC-V # 
+### PASS   read-back cmp.b 0x1234 B @0x10003  (Total of 4660 byte(s) were the same)
+sf write 0x1090000 0x1f000 0x1
+device 0 offset 0x1f000, size 0x1
+SF: 1 bytes @ 0x1f000 Written: OK
+RISC-V # 
+### PASS sf write 0x1 B @0x1f000
+sf read 0x1400000 0x1f000 0x1
+device 0 offset 0x1f000, size 0x1
+SF: 1 bytes @ 0x1f000 Read: OK
+RISC-V # cmp.b 0x1090000 0x1400000 0x1
+Total of 1 byte(s) were the same
+RISC-V # 
+### PASS   read-back cmp.b 0x1 B @0x1f000  (Total of 1 byte(s) were the same)
+sf write 0x10a0000 0x1fff0 0x10
+device 0 offset 0x1fff0, size 0x10
+SF: 16 bytes @ 0x1fff0 Written: OK
+RISC-V # 
+### PASS sf write 0x10 B @0x1fff0
+sf read 0x1400000 0x1fff0 0x10
+device 0 offset 0x1fff0, size 0x10
+SF: 16 bytes @ 0x1fff0 Read: OK
+RISC-V # cmp.b 0x10a0000 0x1400000 0x10
+Total of 16 byte(s) were the same
+RISC-V # 
+### PASS   read-back cmp.b 0x10 B @0x1fff0  (Total of 16 byte(s) were the same)
+sf write 0x10b0000 0x18000 0x100
+device 0 offset 0x18000, size 0x100
+SF: 256 bytes @ 0x18000 Written: OK
+RISC-V # 
+### PASS sf write 0x100 B @0x18000
+sf read 0x1400000 0x18000 0x100
+device 0 offset 0x18000, size 0x100
+SF: 256 bytes @ 0x18000 Read: OK
+RISC-V # cmp.b 0x10b0000 0x1400000 0x100
+Total of 256 byte(s) were the same
+RISC-V # 
+### PASS   read-back cmp.b 0x100 B @0x18000  (Total of 256 byte(s) were the same)
+sf write 0x10c0000 0x1a0fe 0x203
+device 0 offset 0x1a0fe, size 0x203
+SF: 515 bytes @ 0x1a0fe Written: OK
+RISC-V # 
+### PASS sf write 0x203 B @0x1a0fe
+sf read 0x1400000 0x1a0fe 0x203
+device 0 offset 0x1a0fe, size 0x203
+SF: 515 bytes @ 0x1a0fe Read: OK
+RISC-V # cmp.b 0x10c0000 0x1400000 0x203
+Total of 515 byte(s) were the same
+RISC-V # 
+### PASS   read-back cmp.b 0x203 B @0x1a0fe  (Total of 515 byte(s) were the same)
+sf update 0x1100000 0x30100 0x5123
+device 0 offset 0x30100, size 0x5123
+20771 bytes written, 0 bytes skipped in 0.50s, speed 425390 B/s
+RISC-V # 
+### PASS sf update 0x5123 B @0x30100  (20771 bytes written, 0 bytes skipped in 0.50s, speed 425390 B/s)
+sf read 0x1400000 0x30100 0x5123
+device 0 offset 0x30100, size 0x5123
+SF: 20771 bytes @ 0x30100 Read: OK
+RISC-V # cmp.b 0x1100000 0x1400000 0x5123
+Total of 20771 byte(s) were the same
+RISC-V # 
+### PASS   read-back cmp.b after update  (Total of 20771 byte(s) were the same)
+sf read 0x1400000 0x30000 0x6000
+device 0 offset 0x30000, size 0x6000
+SF: 24576 bytes @ 0x30000 Read: OK
+RISC-V # crc32 0x1400000 0x6000
+crc32 for 01400000 ... 01405fff ==> 88e0816c
+RISC-V # 
+### FAIL   update preserved sector head/tail  (crc 88e0816c expect 7334da1e)
+sf update 0x1100000 0x30100 0x5123
+device 0 offset 0x30100, size 0x5123
+0 bytes written, 20771 bytes skipped in 0.21s, speed 1012833 B/s
+RISC-V # 
+### PASS sf update again -> all skipped  (0 bytes written, 20771 bytes skipped in 0.21s, speed 1012833 B/s)
+sf test 0x40000 0x20000
+SPI flash test:
+0 erase: 2 ticks, 64000 KiB/s 512.000 Mbps
+1 check: 114 ticks, 1122 KiB/s 8.976 Mbps
+2 write: 179 ticks, 715 KiB/s 5.720 Mbps
+3 read: 112 ticks, 1142 KiB/s 9.136 Mbps
+Verify failed at 65536, good data:
+00010000: 83 b7 0c 00 82 97 d5 bd 93 07 30 05 e3 17 fa ee  ..........0.....
+00010010: 83 37 0b 00 97 56 07 00 93 86 06 4b 13 87 17 00  .7...V.....K....
+00010020: 23 30 eb 00 23 80 a7 00 e3 69 d7 ec 23 30 fb 00  #0..#....i..#0..
+00010030: e9 b5 93 07 30 05 97 54 07 00 93 84 a4 4c 63 16  ....0..T.....Lc.
+Bad data:
+00010000: 73 25 40 f1 2a 82 ae 84 93 01 00 00 97 12 07 00  s%@.*...........
+00010010: 83 b2 42 f8 73 90 52 30 73 10 40 30 a1 42 63 50  ..B.s.R0s.@0.BcP
+00010020: 52 1c a1 42 73 a0 42 30 b7 02 00 01 9b 82 02 d7  R..Bs.B0........
+00010030: 93 f2 02 ff 13 13 e2 00 33 81 62 40 21 43 3a 03  ........3.b@!C:.
+Test failed
+RISC-V # 
+### FAIL sf test 0x40000 0x20000  (Test failed)
+setenv spi_marker spi3a4ef345
+RISC-V # saveenv
+Saving Environment to SPIFlash... Erasing SPI flash...Writing to SPI flash...done
+OK
+RISC-V # 
+### PASS saveenv
+
+===== QEMU on port 4450 stopped =====
+
+### FAIL host: backing image == expected (outside env/sf-test areas)  (mismatching 4K sectors: 0x10000,0x11000,0x18000,0x1a000,0x1f000,0x30000,0x31000,0x32000)
+
+### PASS host: env sector has valid CRC and spi_marker
+
+===== ae350.sh start 4450 =====
+AE350 QEMU 已啟動
+  pid      : 2625136
+  console  : telnet localhost 4450
+  U-Boot   : /home/spoto/claude_workspace/build-spi/out/u-boot
+  DTB      : /home/spoto/claude_workspace/ae350-qemu/ae350_64.dtb
+  SD       : none
+  SPI      : /home/spoto/claude_workspace/ae350-qemu/run/spi-test-4450.img
+  (wait 模式：telnet 接上才開始開機，不會漏掉開頭 log)
+
+
+
+U-Boot 2026.10 (Nov 10 2026 - 14:33:56 +0800)
+
+CPU:   riscv
+Model: andestech,ax25
+DRAM:  1 GiB
+Core:  26 devices, 17 uclasses, devicetree: board
+Flash: ## Unknown flash on Bank 1 - Size = 0x00000000 = 0 MB
+0 Bytes
+MMC:   mmc@f0e00000: 0
+Loading Environment from SPIFlash...SF: Detected mx25l1606e with page size 256 Bytes, erase size 4 KiB, total 2 MiB
+Loading Environment from SPIFlash... OK
+In:    serial@f0300000
+Out:   serial@f0300000
+Err:   serial@f0300000
+Net:   no alias for ethernet0
+eth0: mac@e0100000
+[2KHit any key to stop autoboot: 3[2KHit any key to stop autoboot: 0
+RISC-V # 
+### PASS boot2: U-Boot prompt reached
+
+### PASS boot2: no 'bad CRC' (env read from flash)
+printenv spi_marker
+spi_marker=spi3a4ef345
+RISC-V # 
+### PASS boot2: printenv spi_marker persisted
+sf probe
+SF: Detected mx25l1606e with page size 256 Bytes, erase size 4 KiB, total 2 MiB
+RISC-V # sf read 0x1000000 0 0x200000
+device 0 whole chip
+SF: 2097152 bytes @ 0x0 Read: OK
+RISC-V # crc32 0x1000000 0x200000
+crc32 for 01000000 ... 011fffff ==> 5c02d5db
+RISC-V # 
+### FAIL boot2: whole-chip read matches backing image  (crc 5c02d5db expect 3a5c01b4)
+
+===== QEMU on port 4450 stopped =====
+
+
+==== SUMMARY: 26/33 PASS ====
+PASS boot1: U-Boot prompt reached
+FAIL boot1: env loaded via SPI flash (MX25L1606E detected)
+PASS sf probe
+FAIL sf read whole chip 2 MiB @0x0  (crc 5c02d5db expect 44d4d4f8)
+PASS sf read unaligned 0x1001 B @0x12345  (crc 49782395 expect 49782395)
+PASS sf read 1 B @0x1fffff (last byte)  (crc d202ef8d expect d202ef8d)
+FAIL sf read 0x400 B @0xfe80 (2nd chunk crosses 64K)  (crc 8cedb693 expect 77cecc6f)
+PASS sf read 0x3 B @0x7ffff (crosses 512K)  (crc d1d589ce expect d1d589ce)
+PASS sf erase 0x10000 +0x10000
+PASS erased block reads back as 0xFF  (crc deab7e4e expect deab7e4e)
+PASS sf erase unaligned offset rejected  (SF: 4096 bytes @ 0x20001 Erased: ERROR -22)
+PASS sf write 0x1234 B @0x10003
+PASS   read-back cmp.b 0x1234 B @0x10003  (Total of 4660 byte(s) were the same)
+PASS sf write 0x1 B @0x1f000
+PASS   read-back cmp.b 0x1 B @0x1f000  (Total of 1 byte(s) were the same)
+PASS sf write 0x10 B @0x1fff0
+PASS   read-back cmp.b 0x10 B @0x1fff0  (Total of 16 byte(s) were the same)
+PASS sf write 0x100 B @0x18000
+PASS   read-back cmp.b 0x100 B @0x18000  (Total of 256 byte(s) were the same)
+PASS sf write 0x203 B @0x1a0fe
+PASS   read-back cmp.b 0x203 B @0x1a0fe  (Total of 515 byte(s) were the same)
+PASS sf update 0x5123 B @0x30100  (20771 bytes written, 0 bytes skipped in 0.50s, speed 425390 B/s)
+PASS   read-back cmp.b after update  (Total of 20771 byte(s) were the same)
+FAIL   update preserved sector head/tail  (crc 88e0816c expect 7334da1e)
+PASS sf update again -> all skipped  (0 bytes written, 20771 bytes skipped in 0.21s, speed 1012833 B/s)
+FAIL sf test 0x40000 0x20000  (Test failed)
+PASS saveenv
+FAIL host: backing image == expected (outside env/sf-test areas)  (mismatching 4K sectors: 0x10000,0x11000,0x18000,0x1a000,0x1f000,0x30000,0x31000,0x32000)
+PASS host: env sector has valid CRC and spi_marker
+PASS boot2: U-Boot prompt reached
+PASS boot2: no 'bad CRC' (env read from flash)
+PASS boot2: printenv spi_marker persisted
+FAIL boot2: whole-chip read matches backing image  (crc 5c02d5db expect 3a5c01b4)

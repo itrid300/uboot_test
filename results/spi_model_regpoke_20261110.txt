@@ -1,0 +1,62 @@
+# ATCSPI200 model raw register checks (flash[0:8] = 3b348a7b13e5237b)
+# 0x42000002 = CmdEn|RO|RdCnt=2 (JEDEC 9F); TransFmt 0x700 = 8-bit no merge, 0x20780 = reset value (merge, 3-byte addr)
+# 0x43000003 = CmdEn|WR(write-then-read) with empty TX FIFO -> must stall SPIActive=1; Ctrl=7 (SPIRST|FIFO resets) aborts
+# 0x62000003 = CmdEn|AddrEn|RO|RdCnt=3 + READ 03 @0 -> merged word = flash[0:4] LE
+# 0x69000007 = CmdEn|AddrEn|DR|RdCnt=7 + FAST_READ 0B: m25p80 Macronix expects 8 dummy transfers, model sends DummyCnt+1=1 -> data shifted by 7 bytes (m25p80 convention, see report)
+RISC-V # md.l 0xf0b00000 1
+f0b00000: 02002000                             . ..
+RISC-V # md.l 0xf0b0007c 1
+f0b0007c: 00000033                             3...
+RISC-V # md.l 0xf0b00010 1
+f0b00010: 00000703                             ....
+RISC-V # mw.l 0xf0b00010 0x00000700
+RISC-V # mw.l 0xf0b00020 0x42000002
+RISC-V # mw.l 0xf0b00024 0x9f
+RISC-V # md.l 0xf0b00034 1
+f0b00034: 00400300                             ..@.
+RISC-V # md.l 0xf0b0002c 1
+f0b0002c: 000000c2                             ....
+RISC-V # md.l 0xf0b0002c 1
+f0b0002c: 00000020                              ...
+RISC-V # md.l 0xf0b0002c 1
+f0b0002c: 00000015                             ....
+RISC-V # md.l 0xf0b00034 1
+f0b00034: 00404000                             .@@.
+RISC-V # mw.l 0xf0b00010 0x00020780
+RISC-V # mw.l 0xf0b00020 0x42000002
+RISC-V # mw.l 0xf0b00024 0x9f
+RISC-V # md.l 0xf0b0002c 1
+f0b0002c: 001520c2                             . ..
+RISC-V # mw.l 0xf0b00020 0x43000003
+RISC-V # mw.l 0xf0b00024 0x03
+RISC-V # md.l 0xf0b00034 1
+f0b00034: 00404001                             .@@.
+RISC-V # mw.l 0xf0b00030 0x7
+RISC-V # md.l 0xf0b00034 1
+f0b00034: 00404000                             .@@.
+RISC-V # md.l 0xf0b00030 1
+f0b00030: 00000000                             ....
+RISC-V # mw.l 0xf0b00028 0x0
+RISC-V # mw.l 0xf0b00020 0x62000003
+RISC-V # mw.l 0xf0b00024 0x03
+RISC-V # md.l 0xf0b0002c 1
+f0b0002c: 7b8a343b                             ;4.{
+RISC-V # md.l 0xf0b00034 1
+f0b00034: 00404000                             .@@.
+RISC-V # mw.l 0xf0b00020 0x69000007
+RISC-V # mw.l 0xf0b00024 0x0b
+RISC-V # md.l 0xf0b0002c 1
+f0b0002c: 00000000                             ....
+RISC-V # md.l 0xf0b0002c 1
+f0b0002c: 3b000000                             ...;
+RISC-V # md.l 0xf0b00034 1
+f0b00034: 00404000                             .@@.
+RISC-V # mw.l 0xf0b00038 0x10
+RISC-V # md.l 0xf0b0003c 1
+f0b0003c: 0000001c                             ....
+RISC-V # mw.l 0xf0b0003c 0x1f
+RISC-V # md.l 0xf0b0003c 1
+f0b0003c: 00000000                             ....
+RISC-V # md.l 0xf0f00000 1
+f0f00000: 02002000                             . ..
+RISC-V # 
